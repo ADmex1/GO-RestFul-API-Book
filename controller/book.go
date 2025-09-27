@@ -31,7 +31,6 @@ func AddBook(c *fiber.Ctx) error {
 func BookPerId(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var books model.Book
-	database.DB.Find(&books)
 	if result := database.DB.First(&books, id); result.Error != nil {
 		return c.Status(404).JSON(fiber.Map{
 			"Error": "Book not found",
