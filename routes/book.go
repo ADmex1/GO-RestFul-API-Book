@@ -7,4 +7,6 @@ import (
 
 func BookRoutes(app *fiber.App) {
 	app.Get("/books", controller.BookIndex)
+	app.Post("/Addbook", controller.AddBook)
+	app.Get("/books/:id", controller.BookPerId)
 }

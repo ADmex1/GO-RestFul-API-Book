@@ -1,0 +1,2 @@
+# github.com/ADMex1/goweb/controller
+controller\book.go:36:12: c.status undefined (type *fiber.Ctx has no field or method status, but does have method Status)
