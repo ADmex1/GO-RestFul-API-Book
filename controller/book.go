@@ -47,18 +47,24 @@ func UpdateBook(c *fiber.Ctx) error {
 			"Error": "Book not found",
 		})
 	}
-	if err := c.BodyParser(&books); err != nil {
+	var updates map[string]interface{}
+	if err := c.BodyParser(&updates); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"Error": "Invalid Input",
 		})
 	}
-	database.DB.Save(&books)
+	if len(updates) == 0 {
+		return c.Status(400).JSON(fiber.Map{"Error": "No fields provided to update"})
+	}
+
+	database.DB.Model(&books).Updates(updates)
+	database.DB.First(&books, id)
 	return c.JSON(books)
 }
 
 func DeleteBook(c *fiber.Ctx) error {
 	id := c.Params("id")
-	if result := database.DB.First(&model.Book{}, id); result.Error != nil {
+	if result := database.DB.Delete(&model.Book{}, id); result.Error != nil {
 		return c.Status(404).JSON(fiber.Map{
 			"Error": "Book not found",
 		})
