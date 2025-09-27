@@ -39,3 +39,30 @@ func BookPerId(c *fiber.Ctx) error {
 	}
 	return c.JSON(books)
 }
+
+func UpdateBook(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var books model.Book
+	if result := database.DB.First(&books, id); result.Error != nil {
+		return c.Status(404).JSON(fiber.Map{
+			"Error": "Book not found",
+		})
+	}
+	if err := c.BodyParser(&books); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"Error": "Invalid Input",
+		})
+	}
+	database.DB.Save(&books)
+	return c.JSON(books)
+}
+
+func DeleteBook(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if result := database.DB.First(&model.Book{}, id); result.Error != nil {
+		return c.Status(404).JSON(fiber.Map{
+			"Error": "Book not found",
+		})
+	}
+	return c.SendStatus(204)
+}
