@@ -22,6 +22,7 @@ func main() {
 
 	routes.BookRoutes(app)
 	routes.DatabaseRoute(app, database.DB)
+	routes.UserRoute(app)
 	//Default Route
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
