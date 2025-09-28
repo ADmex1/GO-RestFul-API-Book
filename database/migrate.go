@@ -7,7 +7,7 @@ import (
 )
 
 func Migration() {
-	err := DB.AutoMigrate(&model.Book{})
+	err := DB.AutoMigrate(&model.Book{}, &model.User{})
 	if err != nil {
 		panic("Migration Failed" + err.Error())
 	}
