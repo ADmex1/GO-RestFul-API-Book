@@ -1,0 +1,2 @@
+# github.com/ADMex1/goweb
+.\main.go:34:49: c.Status(fiber.StatusMethodNotAllowed).c undefined (type *fiber.Ctx has no field or method c)

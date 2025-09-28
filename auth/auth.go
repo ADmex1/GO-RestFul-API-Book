@@ -48,6 +48,7 @@ func UserRegister(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "Failed to generate token"})
 	}
 	return c.Status(201).JSON(fiber.Map{
+		"register": "Success",
 		"user": fiber.Map{
 			"id":    user.InternalID,
 			"name":  user.Name,
