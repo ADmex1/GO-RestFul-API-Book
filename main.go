@@ -63,8 +63,7 @@ func main() {
       font-size: 1.2rem;
       margin: 10px 0 20px;
     }
-    a {
-      display: inline-block;
+    button{
       text-decoration: none;
       background-color: #007bff;
       color: #fff;
@@ -72,17 +71,21 @@ func main() {
       border-radius: 5px;
       transition: background-color 0.3s;
     }
-    a:hover {
+    button:hover {
       background-color: #0056b3;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>405</h1>
-    <p>Method Not Allowed – The request method is not supported for this resource.</p>
-    <a href="/">Go Back Home</a>
-  </div>
+<div class="container">
+<h1>405</h1>
+<p>Method Not Allowed – The request method is not supported for this resource.</p>
+<button href="/">Go Back Home</button>
+<a href="https://www.youtube.com/watch?v=UagP13Zgd7o">
+	  <h3> Marshi I UÇK </h3>
+ </a>
+</div>
+
 </body>
 </html>`,
 			// 		`<html>
