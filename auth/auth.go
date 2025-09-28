@@ -56,4 +56,38 @@ func UserRegister(c *fiber.Ctx) error {
 		},
 		"token": token,
 	})
+
+}
+func UserLogin(c *fiber.Ctx) error {
+	var input struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"{-}Error": "Invalid Input",
+		})
+	}
+	var user model.User
+	if err := DB.Where("email= ?", input.Email).First(&user).Error; err != nil {
+		return c.Status(401).JSON(fiber.Map{
+			"{-}Error": "Invalid Email",
+		})
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+		return c.Status(401).JSON(fiber.Map{
+			"{-}Error": "Invalid password",
+		})
+	}
+	token, err := jwt.JWT(int(user.InternalID), user.Name, user.Role, user.Email, "web")
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to generate token"})
+	}
+	return c.Status(201).JSON(fiber.Map{
+		"user": fiber.Map{
+			"id":   user.InternalID,
+			"name": user.Name,
+		},
+		"token": token,
+	})
 }
