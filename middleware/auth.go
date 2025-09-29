@@ -9,31 +9,68 @@ import (
 
 func JWTGenerator() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		auth := c.Get("Authorization")
-		if auth == " " {
+		authHeader := c.Get("Authorization")
+		if authHeader == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"{-}Error": "Missing Token",
+				"error": "Missing Authorization header",
 			})
 		}
-		split := strings.Split(auth, " ")
-		if len(split) != 2 || split[0] != "Bearer" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"{-}Error": "Invalid Token Format",
-			})
-		}
-		tokenStr := split[1]
 
-		secret := []byte("Sekret Token")
-		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-			return secret, nil
-		})
-		if err != nil || token.Valid {
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"{-}Error": "Invalid Token",
+				"error": "Invalid Authorization format",
 			})
 		}
-		claims := token.Claims.(jwt.MapClaims)
-		c.Locals("user", claims)
+
+		tokenStr := parts[1]
+		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+			return SecretKey, nil
+		})
+		if err != nil || !token.Valid {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Invalid or expired token",
+			})
+		}
+
+		// Extract claims
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			c.Locals("user", claims)
+		}
+
 		return c.Next()
 	}
+}
+
+var SecretKey = []byte("Sekret Token")
+
+func TokenBearer(c *fiber.Ctx) error {
+	authHeader := c.Get("Authorization")
+	if authHeader == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"{-}Error": "Authorization Header is Missing!",
+		})
+	}
+	tokenString := strings.Split(authHeader, " ")
+	if len(tokenString) != 2 {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"{-}Error": "Invalid Format",
+		})
+	}
+	token, err := jwt.Parse(tokenString[1], func(t *jwt.Token) (interface{}, error) {
+		return SecretKey, nil
+	})
+	if err != nil || !token.Valid {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"{-}403": "invalid token",
+		})
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		c.Locals("user", claims)
+	} else {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid token claims",
+		})
+	}
+	return c.Next()
 }
