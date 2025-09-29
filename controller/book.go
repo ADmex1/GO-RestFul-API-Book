@@ -4,6 +4,7 @@ import (
 	"github.com/ADMex1/goweb/database"
 	"github.com/ADMex1/goweb/model"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func BookIndex(c *fiber.Ctx) error {
@@ -20,6 +21,14 @@ func AddBook(c *fiber.Ctx) error {
 			"Error": "Cannot Parse JSON",
 		})
 	}
+	// user := c.Locals("user").(jwt.MapClaims)
+	// userID := int(user["id"].(float64))
+
+	// book.CreatedBy = userID
+	user := c.Locals("user").(jwt.MapClaims)
+	users := int(user["id"].(float64)) // token must have "id"
+
+	book.CreatedBy = int64(users)
 	if result := database.DB.Create(&book); result.Error != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"Error": "unable to add book",
@@ -35,8 +44,9 @@ func BookPerSlug(c *fiber.Ctx) error {
 			"Error": "Slug parameter is required",
 		})
 	}
+
 	var books model.Book
-	if result := database.DB.Where("slug = ?", slug).First(&books); result.Error != nil {
+	if err := database.DB.Preload("User").Where("slug = ?", slug).First(&books); err.Error != nil {
 		return c.Status(404).JSON(fiber.Map{
 			"Error": "Book not found",
 		})
