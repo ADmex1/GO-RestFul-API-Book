@@ -79,9 +79,24 @@ func UpdateBook(c *fiber.Ctx) error {
 
 func DeleteBook(c *fiber.Ctx) error {
 	id := c.Params("id")
-	if result := database.DB.Delete(&model.Book{}, id); result.Error != nil {
+	var books model.Book
+	if err := database.DB.First(&books, id).Error; err != nil {
 		return c.Status(404).JSON(fiber.Map{
 			"Error": "Book not found",
+		})
+	}
+	claims := c.Locals("user").(jwt.MapClaims)
+	role := claims["role"].(string)
+	uid := int(claims["id"].(float64))
+
+	if role != "admin" && books.CreatedBy != int64(uid) {
+		return c.Status(403).JSON(fiber.Map{
+			"{#}": "Unauthorized Access",
+		})
+	}
+	if result := database.DB.Delete(&model.Book{}, id); result.Error != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"Error": "Unable to Delete",
 		})
 	}
 	return c.SendStatus(204)
