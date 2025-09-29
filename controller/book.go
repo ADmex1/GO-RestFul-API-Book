@@ -9,7 +9,7 @@ import (
 
 func BookIndex(c *fiber.Ctx) error {
 	var books []model.Book
-	database.DB.Find(&books)
+	database.DB.Preload("User").Find(&books)
 	return c.JSON(books)
 }
 
