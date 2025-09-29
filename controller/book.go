@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"strings"
+
 	"github.com/ADMex1/goweb/database"
 	"github.com/ADMex1/goweb/model"
 	"github.com/gofiber/fiber/v2"
@@ -8,6 +10,7 @@ import (
 )
 
 func BookIndex(c *fiber.Ctx) error {
+	//Declare variable, calling the model book, and then Preload the User first so the identity of the uploader revealed
 	var books []model.Book
 	database.DB.Preload("User").Find(&books)
 	return c.JSON(books)
@@ -15,7 +18,7 @@ func BookIndex(c *fiber.Ctx) error {
 
 func AddBook(c *fiber.Ctx) error {
 	book := new(model.Book)
-
+	//Formatting
 	if err := c.BodyParser(book); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"Error": "Cannot Parse JSON",
@@ -25,9 +28,11 @@ func AddBook(c *fiber.Ctx) error {
 	// userID := int(user["id"].(float64))
 
 	// book.CreatedBy = userID
+	//User required
 	user := c.Locals("user").(jwt.MapClaims)
 	users := int(user["id"].(float64)) // token must have "id"
 
+	//Checking if there are incoming problem (Db dead or Query Violation)
 	book.CreatedBy = int64(users)
 	if result := database.DB.Create(&book); result.Error != nil {
 		return c.Status(500).JSON(fiber.Map{
@@ -53,7 +58,15 @@ func BookPerSlug(c *fiber.Ctx) error {
 	}
 	return c.JSON(books)
 }
+func slugify(title string) string {
+	slug := strings.ToLower(title)
+	slug = strings.ReplaceAll(slug, " ", "-")
+	slug = strings.ReplaceAll(slug, "/", "-")
+	slug = strings.ReplaceAll(slug, "?", " ")
+	slug = strings.Trim(slug, "-")
 
+	return slug
+}
 func UpdateBook(c *fiber.Ctx) error {
 	slug := c.Params("slug")
 	var book model.Book
@@ -77,8 +90,10 @@ func UpdateBook(c *fiber.Ctx) error {
 			"Error": "Invalid Input",
 		})
 	}
-	if newSlug, ok := updates["slug"].(string); ok && newSlug != "" {
-		book.Slug = newSlug
+
+	if newTitle, ok := updates["title"].(string); ok && newTitle != " " {
+		book.Title = newTitle
+		book.Slug = slugify(newTitle)
 	}
 	if len(updates) == 0 {
 		return c.Status(400).JSON(fiber.Map{"Error": "No fields provided to update"})

@@ -18,9 +18,9 @@ type Book struct {
 	AddedDate   time.Time `json:"added_date" db:"added_date" gorm:"autoCreateTime"`
 }
 
-func (b *Book) BeforeCreate(tx *gorm.DB) (err error) {
-	if b.Slug == "" {
-		b.Slug = slug.Make(b.Title)
+func (Book *Book) BeforeCreate(tx *gorm.DB) (err error) {
+	if Book.Slug == "" {
+		Book.Slug = slug.Make(Book.Title)
 	}
 	return
 }
