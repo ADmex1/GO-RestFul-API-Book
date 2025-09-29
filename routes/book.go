@@ -13,6 +13,6 @@ func BookRoutes(app *fiber.App) {
 	//Group by /Api, so Calling the Api will be like (/Api/Addbook)
 	books := app.Group("/api", middleware.TokenBearer)
 	books.Post("/Addbook", controller.AddBook)
-	books.Put("/updatebook/:id", controller.UpdateBook)
-	books.Delete("/deletebook/:id", controller.DeleteBook)
+	books.Put("/updatebook/:slug", controller.UpdateBook)
+	books.Delete("/deletebook/:slug", controller.DeleteBook)
 }

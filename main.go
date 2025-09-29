@@ -6,6 +6,7 @@ import (
 	"github.com/ADMex1/goweb/database"
 	"github.com/ADMex1/goweb/routes"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func main() {
@@ -15,7 +16,7 @@ func main() {
 	// }
 	// defer db.Close()
 	app := fiber.New()
-
+	app.Use(logger.New())
 	//Route Call
 	database.Connect()
 	database.Migration()
@@ -58,5 +59,6 @@ func main() {
 </html>`,
 		)
 	})
+
 	app.Listen(":" + os.Getenv("PORT"))
 }

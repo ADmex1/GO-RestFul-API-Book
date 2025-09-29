@@ -55,32 +55,9 @@ func BookPerSlug(c *fiber.Ctx) error {
 }
 
 func UpdateBook(c *fiber.Ctx) error {
-	id := c.Params("id")
-	var books model.Book
-	if result := database.DB.First(&books, id); result.Error != nil {
-		return c.Status(404).JSON(fiber.Map{
-			"Error": "Book not found",
-		})
-	}
-	var updates map[string]interface{}
-	if err := c.BodyParser(&updates); err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"Error": "Invalid Input",
-		})
-	}
-	if len(updates) == 0 {
-		return c.Status(400).JSON(fiber.Map{"Error": "No fields provided to update"})
-	}
-
-	database.DB.Model(&books).Updates(updates)
-	database.DB.First(&books, id)
-	return c.JSON(books)
-}
-
-func DeleteBook(c *fiber.Ctx) error {
-	id := c.Params("id")
-	var books model.Book
-	if err := database.DB.First(&books, id).Error; err != nil {
+	slug := c.Params("slug")
+	var book model.Book
+	if result := database.DB.Where("slug = ?", slug).First(&book); result.Error != nil {
 		return c.Status(404).JSON(fiber.Map{
 			"Error": "Book not found",
 		})
@@ -89,15 +66,52 @@ func DeleteBook(c *fiber.Ctx) error {
 	role := claims["role"].(string)
 	uid := int(claims["id"].(float64))
 
-	if role != "admin" && books.CreatedBy != int64(uid) {
+	if role != "admin" && book.CreatedBy != int64(uid) {
 		return c.Status(403).JSON(fiber.Map{
 			"{#}": "Unauthorized Access",
 		})
 	}
-	if result := database.DB.Delete(&model.Book{}, id); result.Error != nil {
+	var updates map[string]interface{}
+	if err := c.BodyParser(&updates); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"Error": "Invalid Input",
+		})
+	}
+	if newSlug, ok := updates["slug"].(string); ok && newSlug != "" {
+		book.Slug = newSlug
+	}
+	if len(updates) == 0 {
+		return c.Status(400).JSON(fiber.Map{"Error": "No fields provided to update"})
+	}
+
+	database.DB.Model(&book).Updates(updates)
+	database.DB.First(&book, slug)
+	return c.JSON(book)
+}
+
+func DeleteBook(c *fiber.Ctx) error {
+	slug := c.Params("slug")
+	var book model.Book
+	if err := database.DB.Where("slug = ?", slug).First(&book).Error; err != nil {
+		return c.Status(404).JSON(fiber.Map{
+			"Error": "Book not found",
+		})
+	}
+	claims := c.Locals("user").(jwt.MapClaims)
+	role := claims["role"].(string)
+	uid := int(claims["id"].(float64))
+
+	if role != "admin" && book.CreatedBy != int64(uid) {
+		return c.Status(403).JSON(fiber.Map{
+			"{#}": "Unauthorized Access",
+		})
+	}
+	if result := database.DB.Where("slug = ?", slug).Delete(&model.Book{}); result.Error != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"Error": "Unable to Delete",
 		})
 	}
-	return c.SendStatus(204)
+	return c.Status(204).JSON(fiber.Map{
+		"{+}Success": "The Book has been Deleted!",
+	})
 }
