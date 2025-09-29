@@ -33,69 +33,29 @@ func main() {
 	app.Get("/:3", func(c *fiber.Ctx) error {
 		c.Type("html")
 		return c.SendString(
-			`			<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>405 Method Not Allowed</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #f8f9fa;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    h1 {
-      font-size: 6rem;
-      color: #ff8800;
-      margin: 0;
-    }
-    p {
-      font-size: 1.2rem;
-      margin: 10px 0 20px;
-    }
-    button{
-      text-decoration: none;
-      background-color: #007bff;
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-  </style>
-</head>
-<body>
-<div class="container">
-<h1>405</h1>
-<p>Method Not Allowed – The request method is not supported for this resource.</p>
-<button href="/">Go Back Home</button>
-<a href="https://www.youtube.com/watch?v=UagP13Zgd7o">
-	  <h3> Marshi I UÇK </h3>
- </a>
-</div>
-
-</body>
+			`	
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>404 Not Found</h1>
+    <a href="/">Back</a>
+    <a href="https://www.youtube.com/watch?v=UagP13Zgd7o">
+      <h3>Marshi I UÇK</h3>
+    </a>
+  </body>
 </html>`,
-			// 		`<html>
-			//     <body>
-			//         <a href="https://www.youtube.com/watch?v=UagP13Zgd7o">
-			// 		<h3> Marshi I UÇK </h3>
-			//         </a>
-			//     </body>
-			// </html>`,
 		)
 	})
 	app.Listen(":" + os.Getenv("PORT"))
