@@ -28,10 +28,15 @@ func AddBook(c *fiber.Ctx) error {
 	return c.JSON(book)
 }
 
-func BookPerId(c *fiber.Ctx) error {
-	id := c.Params("id")
+func BookPerSlug(c *fiber.Ctx) error {
+	slug := c.Params("slug")
+	if slug == "" {
+		return c.Status(400).JSON(fiber.Map{
+			"Error": "Slug parameter is required",
+		})
+	}
 	var books model.Book
-	if result := database.DB.First(&books, id); result.Error != nil {
+	if result := database.DB.Where("slug = ?", slug).First(&books); result.Error != nil {
 		return c.Status(404).JSON(fiber.Map{
 			"Error": "Book not found",
 		})
