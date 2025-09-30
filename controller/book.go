@@ -19,7 +19,7 @@ func BookIndex(c *fiber.Ctx) error {
 }
 
 func AddBook(c *fiber.Ctx) error {
-	//Making sure the folder exists
+	//Making sure the folder exists if it doesnt exist, it will automatically make the folder
 	os.MkdirAll("./storage", os.ModePerm)
 
 	book := new(model.Book)

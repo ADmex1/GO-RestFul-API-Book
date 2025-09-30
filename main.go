@@ -31,6 +31,7 @@ func main() {
 			"{#}Status": "API is Running....",
 		})
 	})
+	app.Static("/storage", "./storage")
 	app.Get("/:3", func(c *fiber.Ctx) error {
 		c.Type("html")
 		return c.SendString(
