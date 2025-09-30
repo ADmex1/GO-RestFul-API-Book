@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/ADMex1/goweb/database"
@@ -17,13 +19,22 @@ func BookIndex(c *fiber.Ctx) error {
 }
 
 func AddBook(c *fiber.Ctx) error {
+	//Making sure the folder exists
+	os.MkdirAll("./storage", os.ModePerm)
+
 	book := new(model.Book)
-	//Formatting
-	if err := c.BodyParser(book); err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"Error": "Cannot Parse JSON",
-		})
-	}
+
+	book.Title = c.FormValue("Title")
+	book.Author = c.FormValue("Author")
+	book.Description = c.FormValue("Description")
+
+	//JSON Format
+	// if err := c.BodyParser(book); err != nil {
+	// 	return c.Status(400).JSON(fiber.Map{
+	// 		"Error": "Cannot Parse JSON",
+	// 	})
+	// }
+
 	// user := c.Locals("user").(jwt.MapClaims)
 	// userID := int(user["id"].(float64))
 
@@ -32,6 +43,25 @@ func AddBook(c *fiber.Ctx) error {
 	user := c.Locals("user").(jwt.MapClaims)
 	users := int(user["id"].(float64)) // token must have "id"
 
+	file, err := c.FormFile("bookfile")
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"{-}Error": "No file uploaded",
+		})
+	}
+	savePath := fmt.Sprintf("./storage/%s", file.Filename)
+	if err := c.SaveFile(file, savePath); err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"{-}Error": "Unable to upload a book",
+		})
+	}
+	book.FileUpload = savePath
+
+	// if err := database.DB.Save(&book).Error; err != nil {
+	// 	return c.Status(500).JSON(fiber.Map{
+	// 		"{-}Error": "Unable to locate uploaded book",
+	// 	})
+	// }
 	//Checking if there are incoming problem (Db dead or Query Violation)
 	book.CreatedBy = int64(users)
 	if result := database.DB.Create(&book); result.Error != nil {
@@ -39,7 +69,7 @@ func AddBook(c *fiber.Ctx) error {
 			"Error": "unable to add book",
 		})
 	}
-	return c.JSON(book)
+	return c.Status(201).JSON(book)
 }
 
 func BookPerSlug(c *fiber.Ctx) error {

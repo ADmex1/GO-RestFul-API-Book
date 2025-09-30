@@ -13,6 +13,7 @@ type Book struct {
 	Slug        string    `json:"slug" db:"slug" gorm:"uniqueIndex"`
 	Author      string    `json:"author" db:"book_author"`
 	Description string    `json:"description" db:"book_description"`
+	FileUpload  string    `json:"file_location" column:"file_location"`
 	CreatedBy   int64     `json:"created_by" gorm:"not_null"`
 	User        User      `json:"user" gorm:"foreignKey:CreatedBy;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	AddedDate   time.Time `json:"added_date" db:"added_date" gorm:"autoCreateTime"`
